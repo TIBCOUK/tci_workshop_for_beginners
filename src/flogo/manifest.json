@@ -1,0 +1,70 @@
+{
+    "name": "salesorders_1_0_flogo_app",
+    "description": " ",
+    "version": "1.0",
+    "type": "flogo",
+    "resources": {
+        "physicalMemory": 1024,
+        "totalMemory": 4096,
+        "cpuQuota": 25
+    },
+    "endpoints": [
+        {
+            "name": "AppHealthCheck",
+            "pingable": true,
+            "protocol": "http",
+            "port": "7777",
+            "type": "private",
+            "ping": "/ping"
+        },
+        {
+            "protocol": "http",
+            "port": "9999",
+            "spec": {
+                "name": "salesorders_1_0_flogo_app",
+                "version": "1.0.0"
+            },
+            "title": "ReceiveHTTPMessage",
+            "swagger": {
+                "swagger": "2.0",
+                "info": {
+                    "title": "salesorders_1_0_flogo_app",
+                    "version": "1.0.0",
+                    "description": " "
+                },
+                "paths": {
+                    "/sync/{orderId}": {
+                        "post": {
+                            "summary": "postSync_orderId_POST",
+                            "operationId": "post_sync_orderId",
+                            "parameters": [
+                                {
+                                    "name": "orderId",
+                                    "in": "path",
+                                    "description": "Request parameter",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "responses": {
+                                "200": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "_response_string": {
+                                                "type": "string",
+                                                "default": "Order has been created with SalesDocumentID 00000013572"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "propertyPrefix": "TCI_FLOGO_USER_",
+    "properties": []
+}

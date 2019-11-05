@@ -1,0 +1,350 @@
+{
+    "imports": [
+        "github.com/project-flogo/flow",
+        "git.tibco.com/git/product/ipaas/wi-contrib.git/contributions/General/activity/rest",
+        "git.tibco.com/git/product/ipaas/wi-contrib.git/contributions/General/activity/log",
+        "github.com/project-flogo/contrib/activity/actreturn",
+        "rest_1 git.tibco.com/git/product/ipaas/wi-contrib.git/contributions/General/trigger/rest",
+        "github.com/project-flogo/contrib/function/string"
+    ],
+    "name": "salesorders_1_0_flogo_app",
+    "description": " ",
+    "version": "1.1.0",
+    "type": "flogo:app",
+    "appModel": "1.1.1",
+    "triggers": [
+        {
+            "ref": "#rest_1",
+            "name": "tibco-wi-rest",
+            "description": "Simple REST Trigger",
+            "settings": {
+                "port": 9999,
+                "secureConnection": false,
+                "serverKey": "",
+                "caCertificate": "",
+                "swagger": ""
+            },
+            "id": "ReceiveHTTPMessage",
+            "handlers": [
+                {
+                    "description": "",
+                    "settings": {
+                        "Method": "POST",
+                        "Path": "/sync/{orderId}",
+                        "OutputValidation": false
+                    },
+                    "action": {
+                        "ref": "github.com/project-flogo/flow",
+                        "settings": {
+                            "flowURI": "res://flow:postSync_orderId_POST"
+                        },
+                        "input": {
+                            "pathParams": {
+                                "mapping": {
+                                    "orderId": "=$.pathParams.orderId"
+                                }
+                            }
+                        },
+                        "output": {
+                            "responseBody": {
+                                "mapping": {
+                                    "body": "=$.responseBody.body"
+                                }
+                            }
+                        }
+                    },
+                    "reply": {
+                        "code": 200,
+                        "configureResponseCodes": true,
+                        "message": ""
+                    },
+                    "schemas": {
+                        "reply": {
+                            "responseCodesSchema": {
+                                "type": "json",
+                                "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"number\"},\"responseType\":{\"type\":\"string\"},\"responseSchema\":{\"type\":\"string\"}}}}",
+                                "fe_metadata": "[{\"code\":200,\"responseType\":\"object\",\"responseSchema\":\"{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"_response_string\\\":{\\\"type\\\":\\\"string\\\",\\\"default\\\":\\\"Order has been created with SalesDocumentID 00000013572\\\"}}}\"}]"
+                            }
+                        },
+                        "output": {
+                            "pathParams": {
+                                "type": "json",
+                                "value": "{\"type\":\"object\",\"properties\":{\"orderId\":{\"type\":\"string\"}},\"required\":[]}",
+                                "fe_metadata": "[{\"parameterName\":\"orderId\",\"type\":\"string\"}]"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "resources": [
+        {
+            "id": "flow:postSync_orderId_POST",
+            "data": {
+                "name": "postSync_orderId_POST",
+                "description": "",
+                "links": [
+                    {
+                        "id": 1,
+                        "from": "GetPurchaseOrder",
+                        "to": "LogMessage",
+                        "type": "default"
+                    },
+                    {
+                        "id": 2,
+                        "from": "LogMessage",
+                        "to": "GetContact",
+                        "type": "default"
+                    },
+                    {
+                        "id": 3,
+                        "from": "GetContact",
+                        "to": "PostSalesOrder",
+                        "type": "default"
+                    },
+                    {
+                        "id": 4,
+                        "from": "PostSalesOrder",
+                        "to": "Return",
+                        "type": "default"
+                    }
+                ],
+                "tasks": [
+                    {
+                        "id": "GetPurchaseOrder",
+                        "name": "GetPurchaseOrder",
+                        "description": "Simple REST Activity",
+                        "activity": {
+                            "ref": "#rest",
+                            "input": {
+                                "Method": "GET",
+                                "Uri": "https://eu-west-1.integration.cloud.tibcoapps.com:443/7yyaglzxcmx3k2y67gfeo2ts6oolxovl/PurchaseOrders/purchaseOrders/{orderId}",
+                                "Timeout": 0,
+                                "requestType": "application/json",
+                                "Use certificate for verification": false,
+                                "Server Certificate": "",
+                                "proxy": "",
+                                "pathParams": {
+                                    "mapping": {
+                                        "orderId": "=$flow.pathParams.orderId"
+                                    }
+                                }
+                            },
+                            "output": {
+                                "configureResponseCodes": false,
+                                "responseType": "application/json"
+                            },
+                            "schemas": {
+                                "input": {
+                                    "pathParams": {
+                                        "type": "json",
+                                        "value": "{\"type\":\"object\",\"properties\":{\"orderId\":{\"type\":\"string\"}},\"required\":[]}",
+                                        "fe_metadata": "[{\"parameterName\":\"orderId\",\"type\":\"string\"}]"
+                                    },
+                                    "headers": {
+                                        "type": "json",
+                                        "value": "{\"type\":\"object\",\"properties\":{\"Accept\":{\"type\":\"string\",\"visible\":false},\"Accept-Charset\":{\"type\":\"string\",\"visible\":false},\"Accept-Encoding\":{\"type\":\"string\",\"visible\":false},\"Content-Type\":{\"type\":\"string\",\"visible\":false},\"Content-Length\":{\"type\":\"string\",\"visible\":false},\"Connection\":{\"type\":\"string\",\"visible\":false},\"Cookie\":{\"type\":\"string\",\"visible\":false},\"Pragma\":{\"type\":\"string\",\"visible\":false}},\"required\":[]}",
+                                        "fe_metadata": "[{\"parameterName\":\"Accept\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Charset\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Encoding\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Type\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Length\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Connection\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Cookie\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Pragma\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false}]"
+                                    }
+                                },
+                                "output": {
+                                    "responseBody": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"d\":{\"type\":\"object\",\"properties\":{\"CreationDate\":{\"type\":\"string\"},\"CreatedByUser\":{\"type\":\"string\"},\"DistributionChannel\":{\"type\":\"string\"},\"OverallSDProcessStatus\":{\"type\":\"string\"},\"OverallTotalDeliveryStatus\":{\"type\":\"string\"},\"SalesDistrict\":{\"type\":\"string\"},\"SoldToParty\":{\"type\":\"string\"},\"TotalNetAmount\":{\"type\":\"string\"},\"TransactionCurrency\":{\"type\":\"string\"},\"SalesOrderType\":{\"type\":\"string\"},\"CustomerPurchaseOrderDate\":{\"type\":\"string\"},\"OverallSDDocumentRejectionSts\":{\"type\":\"string\"},\"ShippingCondition\":{\"type\":\"string\"},\"IncotermsTransferLocation\":{\"type\":\"string\"},\"IncotermsVersion\":{\"type\":\"string\"},\"SalesOrderDate\":{\"type\":\"string\"},\"HeaderBillingBlockReason\":{\"type\":\"string\"},\"SalesGroup\":{\"type\":\"string\"},\"SalesOrder\":{\"type\":\"string\"},\"ShippingType\":{\"type\":\"string\"},\"IncotermsLocation2\":{\"type\":\"string\"},\"DeliveryBlockReason\":{\"type\":\"string\"},\"IncotermsLocation1\":{\"type\":\"string\"},\"AssignmentReference\":{\"type\":\"string\"},\"OrganizationDivision\":{\"type\":\"string\"},\"PurchaseOrderByCustomer\":{\"type\":\"string\"},\"SalesOrganization\":{\"type\":\"string\"},\"IncotermsClassification\":{\"type\":\"string\"},\"SalesOffice\":{\"type\":\"string\"},\"TotalCreditCheckStatus\":{\"type\":\"string\"},\"CustomerPurchaseOrderType\":{\"type\":\"string\"},\"PricingDate\":{\"type\":\"string\"},\"CustomerPaymentTerms\":{\"type\":\"string\"},\"LastChangeDate\":{\"type\":\"string\"},\"SDDocumentReason\":{\"type\":\"string\"},\"RequestedDeliveryDate\":{\"type\":\"string\"},\"PaymentMethod\":{\"type\":\"string\"},\"LastChangeDateTime\":{\"type\":\"string\"}}}}}",
+                                        "fe_metadata": "{\n    \"d\": {\n        \"CreationDate\": \"/Date(1472774400000)/\",\n        \"CreatedByUser\": \"CB9980000027\",\n        \"DistributionChannel\": \"10\",\n        \"OverallSDProcessStatus\": \"20\",\n        \"OverallTotalDeliveryStatus\": \"B\",\n        \"SalesDistrict\": \" \",\n        \"SoldToParty\": \"17100001\",\n        \"TotalNetAmount\": \"353.50\",\n        \"TransactionCurrency\": \"USD\",\n        \"SalesOrderType\": \"OR\",\n        \"CustomerPurchaseOrderDate\": \"/Date(1472774400000)/\",\n        \"OverallSDDocumentRejectionSts\": \"A\",\n        \"ShippingCondition\": \"01\",\n        \"IncotermsTransferLocation\": \"Palo Alto\",\n        \"IncotermsVersion\": \" \",\n        \"SalesOrderDate\": \"/Date(1472774400000)/\",\n        \"HeaderBillingBlockReason\": \" \",\n        \"SalesGroup\": \" \",\n        \"SalesOrder\": \"2\",\n        \"ShippingType\": \" \",\n        \"IncotermsLocation2\": \" \",\n        \"DeliveryBlockReason\": \" \",\n        \"IncotermsLocation1\": \"Palo Alto\",\n        \"AssignmentReference\": \" \",\n        \"OrganizationDivision\": \"00\",\n        \"PurchaseOrderByCustomer\": \"John::Fisher::jfisher@acme.com\",\n        \"SalesOrganization\": \"1710\",\n        \"IncotermsClassification\": \"123\",\n        \"SalesOffice\": \" \",\n        \"TotalCreditCheckStatus\": \" \",\n        \"CustomerPurchaseOrderType\": \"123\",\n        \"PricingDate\": \"/Date(1472774400000)/\",\n        \"CustomerPaymentTerms\": \"0004\",\n        \"LastChangeDate\": \"/Date(1472774400000)/\",\n        \"SDDocumentReason\": \" \",\n        \"RequestedDeliveryDate\": \"/Date(1472774400000)/\",\n        \"PaymentMethod\": \" \",\n        \"LastChangeDateTime\": \"/Date(1472774400000)/\"\n    }\n}"
+                                    },
+                                    "headers": {
+                                        "type": "json",
+                                        "value": "{\"type\":\"object\",\"properties\":{\"Accept\":{\"type\":\"string\",\"visible\":false},\"Accept-Charset\":{\"type\":\"string\",\"visible\":false},\"Accept-Encoding\":{\"type\":\"string\",\"visible\":false},\"Content-Type\":{\"type\":\"string\",\"visible\":false},\"Content-Length\":{\"type\":\"string\",\"visible\":false},\"Connection\":{\"type\":\"string\",\"visible\":false},\"Cookie\":{\"type\":\"string\",\"visible\":false},\"Pragma\":{\"type\":\"string\",\"visible\":false}},\"required\":[]}",
+                                        "fe_metadata": "[{\"parameterName\":\"Accept\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Charset\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Encoding\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Type\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Length\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Connection\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Cookie\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Pragma\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false}]"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "id": "LogMessage",
+                        "name": "LogMessage",
+                        "description": "Simple Log Message Activity",
+                        "activity": {
+                            "ref": "#log",
+                            "input": {
+                                "Log Level": "INFO",
+                                "flowInfo": false,
+                                "message": "=string.tostring($activity[GetPurchaseOrder].responseBody)"
+                            }
+                        }
+                    },
+                    {
+                        "id": "GetContact",
+                        "name": "GetContact",
+                        "description": "Simple REST Activity",
+                        "activity": {
+                            "ref": "#rest",
+                            "input": {
+                                "Method": "GET",
+                                "Uri": "https://eu-west-1.integration.cloud.tibcoapps.com:443/wwkyrltl6iamrpcttjy5rwhpvsjklai5/Contacts/contacts",
+                                "Timeout": 0,
+                                "requestType": "application/json",
+                                "Use certificate for verification": false,
+                                "Server Certificate": "",
+                                "proxy": "",
+                                "queryParams": {
+                                    "mapping": {
+                                        "firstName": "=string.substringBefore($activity[GetPurchaseOrder].responseBody.d.PurchaseOrderByCustomer, \"::\")",
+                                        "lastName": "=string.substringBefore(string.substringAfter($activity[GetPurchaseOrder].responseBody.d.PurchaseOrderByCustomer, \"::\"), \"::\")",
+                                        "email": "=string.substringAfter(string.substringAfter($activity[GetPurchaseOrder].responseBody.d.PurchaseOrderByCustomer, \"::\"), \"::\")"
+                                    }
+                                }
+                            },
+                            "output": {
+                                "configureResponseCodes": false,
+                                "responseType": "application/json"
+                            },
+                            "schemas": {
+                                "input": {
+                                    "queryParams": {
+                                        "type": "json",
+                                        "value": "{\"type\":\"object\",\"properties\":{\"firstName\":{\"type\":\"string\"},\"lastName\":{\"type\":\"string\"},\"email\":{\"type\":\"string\"}},\"required\":[]}",
+                                        "fe_metadata": "[{\"parameterName\":\"firstName\",\"type\":\"string\",\"repeating\":\"\",\"required\":\"\"},{\"parameterName\":\"lastName\",\"type\":\"string\",\"repeating\":\"\",\"required\":\"\"},{\"parameterName\":\"email\",\"type\":\"string\",\"repeating\":\"\",\"required\":\"\"}]"
+                                    },
+                                    "headers": {
+                                        "type": "json",
+                                        "value": "{\"type\":\"object\",\"properties\":{\"Accept\":{\"type\":\"string\",\"visible\":false},\"Accept-Charset\":{\"type\":\"string\",\"visible\":false},\"Accept-Encoding\":{\"type\":\"string\",\"visible\":false},\"Content-Type\":{\"type\":\"string\",\"visible\":false},\"Content-Length\":{\"type\":\"string\",\"visible\":false},\"Connection\":{\"type\":\"string\",\"visible\":false},\"Cookie\":{\"type\":\"string\",\"visible\":false},\"Pragma\":{\"type\":\"string\",\"visible\":false}},\"required\":[]}",
+                                        "fe_metadata": "[{\"parameterName\":\"Accept\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Charset\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Encoding\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Type\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Length\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Connection\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Cookie\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Pragma\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false}]"
+                                    }
+                                },
+                                "output": {
+                                    "responseBody": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"firstName\":{\"type\":\"string\"},\"lastName\":{\"type\":\"string\"},\"mobile\":{\"type\":\"string\"},\"email\":{\"type\":\"string\"},\"mailingStreet\":{\"type\":\"string\"},\"mailingCity\":{\"type\":\"string\"},\"mailingState\":{\"type\":\"string\"},\"mailingPostalCode\":{\"type\":\"string\"}}}",
+                                        "fe_metadata": "{\n    \"firstName\": \"John\",\n    \"lastName\": \"Fisher\",\n    \"mobile\": \"1231231234\",\n    \"email\": \"jfisher@acme.com\",\n    \"mailingStreet\": \"431 Chestnut Street\",\n    \"mailingCity\": \"Philadelphia\",\n    \"mailingState\": \"PA\",\n    \"mailingPostalCode\": \"19150\"\n}"
+                                    },
+                                    "headers": {
+                                        "type": "json",
+                                        "value": "{\"type\":\"object\",\"properties\":{\"Accept\":{\"type\":\"string\",\"visible\":false},\"Accept-Charset\":{\"type\":\"string\",\"visible\":false},\"Accept-Encoding\":{\"type\":\"string\",\"visible\":false},\"Content-Type\":{\"type\":\"string\",\"visible\":false},\"Content-Length\":{\"type\":\"string\",\"visible\":false},\"Connection\":{\"type\":\"string\",\"visible\":false},\"Cookie\":{\"type\":\"string\",\"visible\":false},\"Pragma\":{\"type\":\"string\",\"visible\":false}},\"required\":[]}",
+                                        "fe_metadata": "[{\"parameterName\":\"Accept\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Charset\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Encoding\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Type\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Length\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Connection\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Cookie\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Pragma\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false}]"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "id": "PostSalesOrder",
+                        "name": "PostSalesOrder",
+                        "description": "Simple REST Activity",
+                        "activity": {
+                            "ref": "#rest",
+                            "input": {
+                                "Method": "POST",
+                                "Uri": "https://eu-west-1.integration.cloud.tibcoapps.com:443/qyf5nyddmoz2oh5iloh5wc6yru4qwtn7/Orders/orders",
+                                "Timeout": 0,
+                                "requestType": "application/json",
+                                "Use certificate for verification": false,
+                                "Server Certificate": "",
+                                "proxy": "",
+                                "body": {
+                                    "mapping": {
+                                        "Email": "=$activity[GetContact].responseBody.email",
+                                        "firstName": "=$activity[GetContact].responseBody.firstName",
+                                        "lastName": "=$activity[GetContact].responseBody.lastName",
+                                        "phone": "=$activity[GetContact].responseBody.mobile",
+                                        "price": "=$activity[GetPurchaseOrder].responseBody.d.TotalNetAmount",
+                                        "item": "1"
+                                    }
+                                }
+                            },
+                            "output": {
+                                "configureResponseCodes": false,
+                                "responseType": "application/json"
+                            },
+                            "schemas": {
+                                "input": {
+                                    "headers": {
+                                        "type": "json",
+                                        "value": "{\"type\":\"object\",\"properties\":{\"Accept\":{\"type\":\"string\",\"visible\":false},\"Accept-Charset\":{\"type\":\"string\",\"visible\":false},\"Accept-Encoding\":{\"type\":\"string\",\"visible\":false},\"Content-Type\":{\"type\":\"string\",\"visible\":false},\"Content-Length\":{\"type\":\"string\",\"visible\":false},\"Connection\":{\"type\":\"string\",\"visible\":false},\"Cookie\":{\"type\":\"string\",\"visible\":false},\"Pragma\":{\"type\":\"string\",\"visible\":false}},\"required\":[]}",
+                                        "fe_metadata": "[{\"parameterName\":\"Accept\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Charset\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Encoding\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Type\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Length\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Connection\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Cookie\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Pragma\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false}]"
+                                    },
+                                    "body": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"Email\":{\"type\":\"string\"},\"firstName\":{\"type\":\"string\"},\"item\":{\"type\":\"string\"},\"lastName\":{\"type\":\"string\"},\"phone\":{\"type\":\"string\"},\"price\":{\"type\":\"string\"}}}",
+                                        "fe_metadata": "{\n    \"Email\": \"jfisher@acme.com\",\n    \"firstName\": \"John\",\n    \"item\": \"1\",\n    \"lastName\": \"Fisher\",\n    \"phone\": \"1231231234\",\n    \"price\": \"353.50\"\n}"
+                                    }
+                                },
+                                "output": {
+                                    "responseBody": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"_response_string\":{\"type\":\"string\"}}}",
+                                        "fe_metadata": "{\n    \"_response_string\": \"Sales Order has been created with SalesDocumentID 000013572\"\n}"
+                                    },
+                                    "headers": {
+                                        "type": "json",
+                                        "value": "{\"type\":\"object\",\"properties\":{\"Accept\":{\"type\":\"string\",\"visible\":false},\"Accept-Charset\":{\"type\":\"string\",\"visible\":false},\"Accept-Encoding\":{\"type\":\"string\",\"visible\":false},\"Content-Type\":{\"type\":\"string\",\"visible\":false},\"Content-Length\":{\"type\":\"string\",\"visible\":false},\"Connection\":{\"type\":\"string\",\"visible\":false},\"Cookie\":{\"type\":\"string\",\"visible\":false},\"Pragma\":{\"type\":\"string\",\"visible\":false}},\"required\":[]}",
+                                        "fe_metadata": "[{\"parameterName\":\"Accept\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Charset\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Accept-Encoding\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Type\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Content-Length\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Connection\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Cookie\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false},{\"parameterName\":\"Pragma\",\"type\":\"string\",\"repeating\":\"false\",\"required\":\"false\",\"visible\":false}]"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "id": "Return",
+                        "name": "Return",
+                        "description": "Simple Return Activity",
+                        "activity": {
+                            "ref": "#actreturn",
+                            "settings": {
+                                "mappings": {
+                                    "code": 200,
+                                    "responseBody": {
+                                        "mapping": {
+                                            "body": "=$activity[PostSalesOrder].responseBody"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "metadata": {
+                    "input": [
+                        {
+                            "name": "pathParams",
+                            "type": "object",
+                            "schema": {
+                                "type": "json",
+                                "value": "{\"orderId\":{\"type\":\"string\"}}"
+                            }
+                        }
+                    ],
+                    "output": [
+                        {
+                            "name": "code",
+                            "type": "integer"
+                        },
+                        {
+                            "name": "responseBody",
+                            "type": "object",
+                            "schema": {
+                                "type": "json",
+                                "value": "{\"body\":{\"type\":\"any\"},\"headers\":{\"type\":\"object\"}}"
+                            }
+                        },
+                        {
+                            "name": "message",
+                            "type": "string"
+                        }
+                    ],
+                    "fe_metadata": {
+                        "input": "{\"type\":\"object\",\"title\":\"ReceiveHTTPMessage\",\"properties\":{\"pathParams\":{\"type\":\"object\",\"properties\":{\"orderId\":{\"type\":\"string\"}},\"required\":[\"orderId\"]}}}",
+                        "output": "{\"type\":\"object\",\"title\":\"Inputs\",\"properties\":{\"code\":{\"type\":\"integer\",\"required\":false},\"responseBody\":{\"type\":\"object\",\"properties\":{\"body\":{\"type\":\"any\"},\"headers\":{\"type\":\"object\"}}},\"message\":{\"type\":\"string\",\"required\":false}},\"required\":[]}"
+                    }
+                },
+                "explicitReply": true
+            }
+        }
+    ],
+    "properties": [],
+    "contrib": "W3sicmVmIjoiZ2l0LnRpYmNvLmNvbS9naXQvcHJvZHVjdC9pcGFhcy93aS1jb250cmliLmdpdC9jb250cmlidXRpb25zL0dlbmVyYWwiLCJzM2xvY2F0aW9uIjoiVGliY28vR2VuZXJhbCJ9XQ==",
+    "fe_metadata": "UEsDBAoAAAAIAEM9ZU+rqSRGFQAAABMAAAAIAAAAYXBwLmpzb26rViopykxPTy1yy8kvL1ayio6tBQBQSwECFAAKAAAACABDPWVPq6kkRhUAAAATAAAACAAAAAAAAAAAAAAAAAAAAAAAYXBwLmpzb25QSwUGAAAAAAEAAQA2AAAAOwAAAAAA"
+}
